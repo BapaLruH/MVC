@@ -1,0 +1,51 @@
+package com.bap.ru.model;
+
+import com.bap.ru.bean.User;
+import com.bap.ru.model.service.UserService;
+import com.bap.ru.model.service.UserServiceImpl;
+
+import java.util.List;
+
+public class MainModel implements Model {
+
+    private ModelData modelData = new ModelData();
+    private UserService userService = new UserServiceImpl();
+
+    @Override
+    public ModelData getModelData() {
+        return modelData;
+    }
+
+    private List<User> getAllUsers() {
+        return userService.filterOnlyActiveUsers(userService.getUsersBetweenLevels(1, 100));
+    }
+
+    @Override
+    public void loadUsers() {
+        modelData.setUsers(getAllUsers());
+        modelData.setDisplayDeletedUserList(false);
+    }
+
+    @Override
+    public void loadDeletedUsers() {
+        modelData.setUsers(userService.getAllDeletedUsers());
+        modelData.setDisplayDeletedUserList(true);
+    }
+
+    @Override
+    public void loadUserById(long userId) {
+        modelData.setActiveUser(userService.getUsersById(userId));
+    }
+
+    @Override
+    public void deleteUserById(long id) {
+        userService.deleteUser(id);
+        loadUsers();
+    }
+
+    @Override
+    public void changeUserData(String name, long id, int level) {
+        userService.createOrUpdateUser(name, id, level);
+        loadUsers();
+    }
+}
